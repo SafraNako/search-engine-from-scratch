@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    # SQLite FTS5 (the sqlite3 module of Python) is the oracle of the comparison tests, scikit-learn the oracle of the TF-IDF test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install the package and the development dependencies
+        run: pip install -e ".[dev]"
+      - name: Show the versions that are compared
+        run: python -c "import sqlite3, sklearn, sys; c = sqlite3.connect(':memory:'); c.execute('create virtual table t using fts5(a)'); print('python', sys.version.split()[0], 'sqlite', sqlite3.sqlite_version, 'fts5 ok', 'scikit-learn', sklearn.__version__)"
+      - name: Run the tests (480 random scenarios against FTS5)
+        run: KENDI_FUZZ=480 pytest -v
+      - name: Benchmark (smoke run)
+        run: python benchmarks/bench.py 800
