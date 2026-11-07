@@ -44,6 +44,12 @@ def test_the_operators_are_operators_only_in_capitals():
     assert parse("cat AND dog") == And(P("cat"), P("dog"))
     assert parse("not") == P("not")
     assert parse("near") == P("near")
+    # NEAR is an operator only in front of a parenthesis
+    assert parse("NEAR") == P("NEAR") and parse("a NEAR") == And(P("a"), P("NEAR"), implicit=True) and parse("NEAR a") == And(P("NEAR"), P("a"), implicit=True)
+    assert parse('NEAR"a b"') == And(P("NEAR"), P("a b"), implicit=True)
+    with pytest.raises(QuerySyntaxError):
+        parse("NEAR:a")  # a word in front of a colon is a field, and there is no field of that name
+    assert parse("NEAR (a b)") == Near([P("a"), P("b")], 10)
     assert parse('"AND"') == P("AND")  # quoted, it is a word
     with pytest.raises(QuerySyntaxError):
         parse("AND")
@@ -111,7 +117,7 @@ def test_near():
     assert parse("NEAR(a)") == Near([P("a")], 10)
     assert parse("title:NEAR(a b)") == Near([P("a"), P("b")], 10, frozenset({0}))
     assert parse("NEAR(a b) c") == And(Near([P("a"), P("b")], 10), P("c"), implicit=True)
-    for bad in ["NEAR(a b,)", "NEAR(a b, x)", "NEAR(a b, -1)", "NEAR(, a b)", "NEAR()", "NEAR(a b", "NEAR a b", "NEAR(title:a b)", "NEAR(^a b)", "a NEAR b", "NEAR(a b, 1.5)", "NEAR(a b, 1 2)"]:
+    for bad in ["NEAR(a b,)", "NEAR(a b, x)", "NEAR(a b, -1)", "NEAR(, a b)", "NEAR()", "NEAR(a b", "NEAR(title:a b)", "NEAR(^a b)", "NEAR(a b, 1.5)", "NEAR(a b, 1 2)"]:
         with pytest.raises(QuerySyntaxError):
             parse(bad)
 

@@ -13,7 +13,7 @@ The syntax is the one of SQLite FTS5 (the tests run the same queries through bot
     colour~1                 fuzzy: words within one edit of colour (insert, delete, replace, swap)    [not in FTS5]
 
 A bare word is letters, digits, ``_`` and any non-ASCII character; everything else has to be inside double quotes.  The words ``AND``,
-``OR``, ``NOT`` and ``NEAR`` are operators only in capitals.
+``OR`` and ``NOT`` are operators only in capitals, ``NEAR`` only in capitals and in front of a ``(``.
 """
 from __future__ import annotations
 
@@ -172,7 +172,14 @@ def lex(text: str, fuzzy: bool = True) -> List[_Tok]:
             while i < n and _is_bareword(text[i]):
                 i += 1
             word = text[start:i]
-            out.append(_Tok(_KEYWORDS.get(word, STRING), word, start))
+            kind = _KEYWORDS.get(word, STRING)
+            if kind == NEAR:  # NEAR is an operator only in front of "(", else it is a word like any other
+                j = i
+                while j < n and text[j] in " \t\n\r":
+                    j += 1
+                if j >= n or text[j] != "(":
+                    kind = STRING
+            out.append(_Tok(kind, word, start))
         elif ch == "~" and fuzzy:
             start = i
             i += 1

@@ -102,7 +102,7 @@ def test_hand_picked_queries_agree_with_fts5():
         'NEAR(a "x y", 0)', 'NEAR(a)', 'NEAR(a b c, 2)', 'NEAR("a b" b)', 'NEAR(a* b)', 'NEAR(a b, 0) c', '"a b" + c', 'a + b', 'a + b + c', 'a b OR c',
         'a OR b c', 'a NOT b', 'a NOT b NOT c', 'a NOT (b c)', '^a', '^"a x"', '^a b', 'a ^b', 'a*', '"a b"*', 'a b*', 'title:a', 'body:a', 'title: a b',
         'title:(a b)', '{title body}:a', '-title:a', 'title:NEAR(a b)', 'title:^a', 'a AND b OR c AND d', 'a AND (b OR c)', 'run*', 'running', 'fox*', 'a "" b',
-        'a ""', '"" a', 'a AND ""', '"" AND a', 'a OR ""', 'a NOT ""', '"" NOT a', '"!!"', 'a "!!" b', 'TITLE:a', '{TITLE Body}:a', 'a AND NEAR("!!")',
+        'a ""', '"" a', 'a AND ""', '"" AND a', 'a OR ""', 'a NOT ""', '"" NOT a', '"!!"', 'a "!!" b', 'TITLE:a', '{TITLE Body}:a', 'a AND NEAR("!!")', 'NEAR', 'NEAR a', 'NEAR (a b)', 'NEAR"a b"', 'a NEAR', 'NEAR NEAR b', 'title:NEAR"a b"',
     ]
     with idx.searcher() as s:
         for q in queries:
